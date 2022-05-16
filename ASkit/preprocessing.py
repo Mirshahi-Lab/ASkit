@@ -234,7 +234,7 @@ def map_sex_restrictions(codes: pl.LazyFrame, sex: str, code_file: str) -> pl.La
         pl.LazyFrame
             of ``PT_ID, code, index``
     """
-    sex = _read_file(sex, columns=["PT_ID", "sex'"])
+    sex = _read_file(sex, columns=["PT_ID", "sex"])
     sex = sex.select(
         [
             pl.col("PT_ID").cast(pl.Categorical).alias("PT_ID"),
@@ -287,16 +287,19 @@ def _read_file(filename: str, columns=None) -> pl.LazyFrame:
     path = Path(filename)
     if path.is_file():
         if path.suffix == ".csv":
-            return pl.scan_csv(path, columns=columns)
+            df = pl.scan_csv(path)
         elif path.suffix == ".parquet":
-            return pl.scan_parquet(path, columns=columns)
+            df = pl.scan_parquet(path)
         elif path.suffix in (".ipc", ".feather"):
-            return pl.scan_ipc(path, columns=columns)
+            df = pl.scan_ipc(path)
         else:
             raise ValueError(
                 "Invalid input file extension - .csv, .parquet, and .feather/.IPC are "
                 "accepted"
             )
+        if columns:
+            df = df.select(columns)
+        return df
     else:
         raise FileNotFoundError(f"Input file {filename} not found!")
 
