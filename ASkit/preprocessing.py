@@ -80,7 +80,6 @@ def create_phenotypes(
         codes = (
             codes.groupby(["PT_ID", "code"])
             .agg(pl.count())
-            .filter(pl.col("count") > 0)
             .with_column(pl.col("count").cast(pl.Int16))
         )
 
@@ -287,7 +286,7 @@ def _read_file(filename: str, columns=None) -> pl.LazyFrame:
     path = Path(filename)
     if path.is_file():
         if path.suffix == ".csv":
-            df = pl.scan_csv(path)
+            df = pl.scan_csv(path, parse_dates=True)
         elif path.suffix == ".parquet":
             df = pl.scan_parquet(path)
         elif path.suffix in (".ipc", ".feather"):
