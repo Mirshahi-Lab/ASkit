@@ -313,6 +313,10 @@ def _pd_write_file(
         else:
             output.to_csv(filename, index=False)
     elif path.suffix == ".parquet":
+        if low_memory:
+            raise NotImplementedError(
+                "Only .csv output is supported for low_memory mode"
+            )
         output.to_parquet(filename, index=False)
     else:
         raise ValueError(
