@@ -303,10 +303,15 @@ def _read_file(filename: str, columns=None) -> pl.LazyFrame:
         raise FileNotFoundError(f"Input file {filename} not found!")
 
 
-def _pd_write_file(output: pd.DataFrame, filename: str) -> None:
+def _pd_write_file(
+    output: pd.DataFrame, filename: str, low_memory: bool = False
+) -> None:
     path = Path(filename)
     if path.suffix == ".csv":
-        output.to_csv(filename, index=False)
+        if low_memory:
+            output.to_csv(filename, index=False, mode="a", header=not path.is_file())
+        else:
+            output.to_csv(filename, index=False)
     elif path.suffix == ".parquet":
         output.to_parquet(filename, index=False)
     else:
