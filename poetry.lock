@@ -264,7 +264,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "c948bccdd220ff6c279db8be7d48b6db618107b4f26cd88cca384af9f06108b9"
+content-hash = "4c0af2f12e4d3af4a94eea1c9ffcd465565856d5e7d37a07abbc252287e23ce8"
 
 [metadata.files]
 cycler = [
