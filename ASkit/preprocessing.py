@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import polars as pl
 
@@ -11,6 +12,7 @@ def create_phenotypes(
     phecode_rollup: bool = True,
     phecode_exclude: bool = True,
     sex: str = None,
+    n_chunks: int = 1,
     outfile: str = None,
 ) -> pd.DataFrame:
     """
@@ -43,6 +45,10 @@ def create_phenotypes(
         Path to a csv, parquet, or feather/IPC file containing columns ``PT_ID, sex``,
         where sex is provided as ``Male`` or ``Female``. If supplied, sex-based PheCode
         restrictions will be applied.
+    n_chunks
+        Number of batches to run the mapping in, subject-wise. Eg ``n_chunks=3`` will
+        perform the mapping in 3 batches of subjects. The output of each batch will be
+        appended to ``outfile``. Only .csv output is supported.
     outfile
         Output path for saving the phenotype file.
 
@@ -50,7 +56,6 @@ def create_phenotypes(
     -------
     pd.DataFrame
     """
-    codes = _read_file(code_file)
 
     # can't rename LazyFrame columns to their own names,
     # see https://github.com/pola-rs/polars/issues/3361
@@ -63,56 +68,97 @@ def create_phenotypes(
     #     index_name: 'index'
     # })
 
+    if n_chunks > 1 and Path(outfile).suffix != ".csv":
+        raise NotImplementedError(
+            "Only .csv output is supported for chunked PheCode mapping."
+        )
+    if outfile and Path(outfile).is_file():
+        Path(outfile).unlink()
+
     with pl.StringCache():
-        codes = codes.with_columns(
-            [
-                pl.col("PT_ID").cast(pl.Categorical),
-                pl.col("code").cast(pl.Categorical),
-            ]
+        cohort_codes = _get_cohort_codes(
+            code_file, map_phecodes, phecode_rollup, phecode_exclude
         )
 
-        if map_phecodes:
-            codes = map_icd_to_phecodes(codes)
+        if n_chunks > 1:
+            cohort_ids = (
+                _read_file(code_file)
+                .select("PT_ID")
+                .unique()
+                .with_column(pl.col("PT_ID").cast(pl.Categorical))
+                .collect()["PT_ID"]
+            )
 
-        if phecode_rollup:
-            codes = map_rollup(codes)
+            if n_chunks > cohort_ids.shape[0]:
+                raise ValueError("n_chunks is greater than number of subjects")
+            chunks = np.array_split(np.arange(cohort_ids.shape[0]), n_chunks)
+        else:
+            chunks = range(1)
+            chunk_ids = None
 
-        codes = (
-            codes.groupby(["PT_ID", "code"])
-            .agg(pl.count())
-            .with_column(pl.col("count").cast(pl.Int16))
-        )
-
-        if phecode_exclude:
-            codes = map_exclusions(codes)
-
-        if sex:
-            codes = map_sex_restrictions(codes, sex, code_file)
-
-        codes = (
-            codes.groupby(["PT_ID", "code"])
-            .agg(pl.max("count"))
-            .select(
+        for chunk in chunks:
+            codes = _read_file(code_file)
+            codes = codes.with_columns(
                 [
-                    "PT_ID",
-                    "code",
-                    pl.when(pl.col("count") < min_code_count)
-                    .then(-9)
-                    .otherwise(1)
-                    .alias("count"),
+                    pl.col("PT_ID").cast(pl.Categorical),
+                    pl.col("code").cast(pl.Categorical),
                 ]
             )
-        )
+            if n_chunks > 1:
+                chunk_ids = cohort_ids.take(chunk)
 
-        codes = codes.collect()
+                # https://github.com/pola-rs/polars/issues/3420
+                # codes = codes.filter(pl.col("PT_ID").is_in(chunk_ids))
+                # workaround join
+                codes = codes.join(chunk_ids.to_frame().lazy(), how="inner", on="PT_ID")
 
-        # polars pivot takes uses a LOT more ram
-        codes = codes.to_pandas()
-        codes = codes.pivot(index="PT_ID", columns="code", values="count")
-        codes = codes.fillna(0)
-        codes = codes[codes.columns.sort_values()].reset_index()
-        if outfile:
-            _pd_write_file(output=codes, filename=outfile)
+            if map_phecodes:
+                codes = map_icd_to_phecodes(codes)
+
+            if phecode_rollup:
+                codes = map_rollup(codes)
+
+            codes = (
+                codes.groupby(["PT_ID", "code"])
+                .agg(pl.count())
+                .with_column(pl.col("count").cast(pl.Int16))
+            )
+
+            if phecode_exclude:
+                codes = map_exclusions(codes)
+
+            if sex:
+                codes = map_sex_restrictions(codes, sex, cohort_codes, chunk_ids)
+
+            codes = (
+                codes.groupby(["PT_ID", "code"])
+                .agg(pl.max("count"))
+                .select(
+                    [
+                        "PT_ID",
+                        "code",
+                        pl.when(pl.col("count") < min_code_count)
+                        .then(-9)
+                        .otherwise(1)
+                        .cast(pl.Int16)
+                        .alias("count"),
+                    ]
+                )
+            )
+
+            if n_chunks > 1:
+                codes = _add_missing_codes(codes, cohort_codes, chunk_ids)
+            codes = codes.collect()
+
+            # polars pivot takes uses a LOT more ram
+            codes = codes.to_pandas()
+            codes = codes.pivot(
+                index="PT_ID", columns="code", values="count"
+            ).rename_axis(None, axis=1)
+            codes = codes.fillna(0)
+            codes = codes[sorted(codes.columns.tolist())].reset_index()
+            if outfile:
+                _pd_write_file(output=codes, filename=outfile, n_chunks=n_chunks)
 
     return codes
 
@@ -217,7 +263,9 @@ def map_exclusions(codes: pl.LazyFrame) -> pl.LazyFrame:
     return codes
 
 
-def map_sex_restrictions(codes: pl.LazyFrame, sex: str, code_file: str) -> pl.LazyFrame:
+def map_sex_restrictions(
+    codes: pl.LazyFrame, sex: str, cohort_codes: pl.DataFrame, chunk_ids: pl.Series
+) -> pl.LazyFrame:
     """
     Apply PheCode sex restrictions. Uses ``PheWAS::gender_restriction`` from the R pkg.
     Parameters
@@ -240,6 +288,8 @@ def map_sex_restrictions(codes: pl.LazyFrame, sex: str, code_file: str) -> pl.La
             pl.col("sex").cast(pl.Categorical),
         ]
     )
+    if chunk_ids:
+        sex = sex.join(chunk_ids.to_frame().lazy(), how="inner", on="PT_ID")
 
     sex_restrictions = pl.scan_parquet(
         "resources/sex_restriction.parquet"  # PheWAS::gender_restriction
@@ -251,10 +301,8 @@ def map_sex_restrictions(codes: pl.LazyFrame, sex: str, code_file: str) -> pl.La
     )
 
     # only keep codes that are observed in cohort
-    sex_restrictions = (
-        sex_restrictions.join(codes, how="inner", on="code")
-        .select(pl.col(["code", "exclude_sex"]))
-        .unique()
+    sex_restrictions = sex_restrictions.join(
+        cohort_codes.lazy(), how="inner", on="code"
     )
 
     # change existing codes that are inconsistent with id's sex
@@ -282,6 +330,120 @@ def map_sex_restrictions(codes: pl.LazyFrame, sex: str, code_file: str) -> pl.La
     return pl.concat([codes, sex_restrictions])
 
 
+def _get_cohort_codes(
+    code_file: str,
+    map_phecodes: bool = True,
+    phecode_rollup: bool = True,
+    phecode_exclude: bool = True,
+):
+    """
+    Get all unique PheCodes seen in cohort, starting from ICD codes.
+
+    Parameters
+    ----------
+    code_file
+        ICD code file with columns ``id, ICD, index``.
+    map_phecodes
+    phecode_rollup
+    phecode_exclude
+
+    Returns
+    -------
+    pl.DataFrame
+    """
+    codes = (
+        _read_file(code_file)
+        .select("code")
+        .with_column(pl.col("code").cast(pl.Categorical))
+    )
+
+    if map_phecodes:
+        phemap = pl.scan_parquet("resources/phecode_map.parquet")  # PheWAS::phecode_map
+        phemap = phemap.with_columns(
+            [
+                pl.col("code").cast(pl.Categorical),
+                pl.col("phecode").cast(pl.Categorical),
+            ]
+        )
+
+        codes = (
+            codes.join(phemap, on=["code"], how="inner")
+            .select(pl.col("phecode").alias("code"))
+            .unique()
+        )
+
+        if phecode_rollup:
+            rollup_map = pl.scan_parquet(
+                "resources/phecode_rollup_map.parquet"  # PheWAS::phecode_rollup_map
+            )
+
+            rollup_map = rollup_map.with_columns(
+                [
+                    pl.col("code").cast(pl.Categorical),
+                    pl.col("phecode_unrolled").cast(pl.Categorical),
+                ]
+            )
+
+            codes = codes.join(rollup_map, how="inner", on="code").select(
+                pl.col("phecode_unrolled").alias("code")
+            )
+
+        if phecode_exclude:
+            exclusions = pl.scan_parquet(
+                "resources/phecode_exclude.parquet"  # PheWAS::phecode_exclude)
+            )
+
+            exclusions = exclusions.with_columns(
+                [
+                    pl.col("code").cast(pl.Categorical),
+                    pl.col("exclusion_criteria").cast(pl.Categorical),
+                ]
+            )
+            exclusions = (
+                exclusions.join(
+                    codes.select(pl.col("code").alias("exclusion_criteria")),
+                    how="inner",
+                    on="exclusion_criteria",
+                )
+                .select("code")
+                .unique()
+            )
+            codes = pl.concat([codes, exclusions])
+
+        return codes.unique().collect()
+
+
+def _add_missing_codes(
+    codes: pl.LazyFrame, cohort_codes: pl.DataFrame, chunk_ids: pl.Series
+) -> pl.LazyFrame:
+    """
+    Add PheCodes seen in the cohort that are not in the current chunk of subjects. This
+    allows for appending the mapping output in batches.
+
+    Parameters
+    ----------
+    codes
+        pl.LazyFrame of current chunk ``'PT_ID','code','count'``
+    cohort_codes
+        pl.DataFrame of all codes seen in cohort, including mapped exclusions.
+    chunk_ids
+        All subject ids in the current chunk
+    Returns
+    -------
+    pl.LazyFrame
+    """
+    # https://github.com/pola-rs/polars/issues/3420
+    chunk_codes = codes.select("code").unique().collect()["code"]
+    missing_codes = cohort_codes.filter(~pl.col("code").is_in(chunk_codes))
+    missing_codes = missing_codes.with_columns(
+        [
+            chunk_ids[:1].alias("PT_ID").cast(pl.Categorical),
+            pl.lit(None).cast(pl.Int16).alias("count"),
+        ]
+    ).select(["PT_ID", "code", "count"])
+    return pl.concat([codes, missing_codes.lazy()])
+
+
 def _read_file(filename: str, columns=None) -> pl.LazyFrame:
     path = Path(filename)
     if path.is_file():
@@ -303,11 +465,18 @@ def _read_file(filename: str, columns=None) -> pl.LazyFrame:
         raise FileNotFoundError(f"Input file {filename} not found!")
 
 
-def _pd_write_file(output: pd.DataFrame, filename: str) -> None:
+def _pd_write_file(output: pd.DataFrame, filename: str, n_chunks: int = 1) -> None:
     path = Path(filename)
     if path.suffix == ".csv":
-        output.to_csv(filename, index=False)
+        if n_chunks > 1:
+            output.to_csv(filename, index=False, mode="a", header=not path.is_file())
+        else:
+            output.to_csv(filename, index=False)
     elif path.suffix == ".parquet":
+        if n_chunks > 1:
+            raise NotImplementedError(
+                "Only .csv output is supported for low_memory mode"
+            )
         output.to_parquet(filename, index=False)
     else:
         raise ValueError(
