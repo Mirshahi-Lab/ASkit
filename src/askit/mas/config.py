@@ -72,6 +72,10 @@ class MASConfig:
     male_only: bool
     female_only: bool
 
+    # Logger Options
+    verbose: bool
+    quiet: bool
+
     # Derived attributes post-init
     reader: FunctionType | partial[pl.LazyFrame] | None = field(
         default=None, init=False
@@ -125,6 +129,8 @@ class MASConfig:
             female_code=args.female_code,
             male_only=args.male_only,
             female_only=args.female_only,
+            verbose=args.verbose,
+            quiet=args.quiet,
         )
 
     def setup_logger(self):
@@ -137,7 +143,7 @@ class MASConfig:
                 filter=lambda record: record["level"].no <= 25,
                 enqueue=True,
             )
-            logger.add(sys.stderr, level="ERROR", format=self._log_format, enqueue=True)
+            logger.add(sys.stderr, level="ERROR", format=_log_format, enqueue=True)
         elif self.verbose:
             logger.add(
                 sys.stdout,
@@ -146,21 +152,19 @@ class MASConfig:
                 filter=lambda record: record["level"].no <= 25,
                 enqueue=True,
             )
-            logger.add(
-                sys.stderr, level="WARNING", format=self._log_format, enqueue=True
-            )
+            logger.add(sys.stderr, level="WARNING", format=_log_format, enqueue=True)
         else:
             logger.add(
                 sys.stdout,
                 level="INFO",
-                format=self._log_format,
+                format=_log_format,
                 filter=lambda record: record["level"].no <= 25,
                 enqueue=True,
             )
             logger.add(
                 sys.stderr,
                 level="WARNING",
-                format=self._log_format,
+                format=_log_format,
                 enqueue=True,
             )
 
