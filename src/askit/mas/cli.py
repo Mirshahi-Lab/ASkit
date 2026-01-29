@@ -188,8 +188,8 @@ def add_mas_command(subparsers: _SubParsersAction) -> None:
         default="fail",
         help="Default is 'fail'. Specify how to handle missing values in covariates. "
         "'fail' will raise an error if missing values are present, "
+        "'fail' will raise an error if missing values are present, "
         "'drop' will remove rows with missing values."
-        "",
     )
     # TODO Add preprocessing transformations
 
