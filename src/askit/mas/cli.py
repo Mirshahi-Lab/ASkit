@@ -1,6 +1,8 @@
 from argparse import _SubParsersAction
 from pathlib import Path
 
+from askit.mas.pipeline import run_mas
+
 
 def add_mas_command(subparsers: _SubParsersAction) -> None:
     """Add the 'mas' subcommand to the ASkit CLI."""
@@ -9,35 +11,46 @@ def add_mas_command(subparsers: _SubParsersAction) -> None:
         help="Multiple Association Study (MAS)",
         description="Run a Multiple Association Study (MAS)",
     )
-
+    # Set the default function to run when the 'mas' subcommand is invoked
+    subparser.set_defaults(func=run_mas)
+    subparser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Default is False. "
+        "If set, see the configuration but do not actually run the MAS.",
+    )
     input_group = subparser.add_argument_group(
-        "Input Options", "Options for specifying input data for the MAS analysis"
+        "Input Options", "Options for specifying input data for the MAS."
     )
     input_group.add_argument(
-        "--input",
+        "--input-file",
         "-i",
         type=Path,
         help="Input file path. Can be a .parquet, .ipc, .csv, .tsv,"
         " or .txt file. File suffix must match the format!",
+        required=True,
     )
     input_group.add_argument(
-        "--output",
+        "--output-file",
         "-o",
         type=Path,
         help="Output file path for the MAS analysis results. Can be a .parquet, "
         ".ipc, .csv, .tsv, or .txt file. File suffix will match the format.",
+        required=True,
     )
     input_group.add_argument(
         "--predictors",
         "-p",
         type=str,
         help="Predictor columns (comma separated list of names or i:INDEX for indices)",
+        required=True,
     )
     input_group.add_argument(
         "--dependents",
         "-d",
         type=str,
         help="Dependent columns (comma separated list of names or i:INDEX for indices)",
+        required=True,
     )
     input_group.add_argument(
         "--covariates",
@@ -99,6 +112,7 @@ def add_mas_command(subparsers: _SubParsersAction) -> None:
         choices=["firth", "firth-hybrid", "logistic", "linear"],
         help="Model to use for MAS. Firth-hybrid runs Firth's logistic regression"
         " if logistic regression p-value is below alpha threshold.",
+        required=True,
     )
     model_group.add_argument(
         "--max-iter",
@@ -167,8 +181,8 @@ def add_mas_command(subparsers: _SubParsersAction) -> None:
         "Also works as the minimum observation count for linear regression.",
     )
     preprocessing_group.add_argument(
-        "--missing-covariate-values",
-        "-mcv",
+        "--missing-covariates-operation",
+        "-mco",
         type=str,
         choices=["fail", "drop"],  # TODO Add more options here
         help="Default is 'fail'. Specify how to handle missing values in covariates. "
@@ -215,4 +229,16 @@ def add_mas_command(subparsers: _SubParsersAction) -> None:
         "--female-only",
         action="store_true",
         help="Run the analysis only on female samples.",
+    )
+
+    # Logger options
+    logger_group = subparser.add_argument_group(
+        "Logger Options", "Options for configuring the logger."
+    )
+    verbosity = logger_group.add_mutually_exclusive_group()
+    verbosity.add_argument(
+        "--verbose", action="store_true", help="Enable verbose output for the logger."
+    )
+    verbosity.add_argument(
+        "--quiet", action="store_true", help="Enable quiet output for the logger."
     )

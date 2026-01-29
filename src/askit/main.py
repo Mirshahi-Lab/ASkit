@@ -10,4 +10,5 @@ def main() -> None:
         title="subcommands", description="Available subcommands", required=True
     )
     add_mas_command(subparsers)
-    # args = parser.parse_args()
+    args = parser.parse_args()
+    args.func(args)
