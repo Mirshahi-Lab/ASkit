@@ -1,23 +1,21 @@
-[tool.poetry]
+[project]
 name = "askit"
-version = "0.0.1"
+version = "0.1.0"
 description = ""
-authors = ["jzluo <20971593+jzluo@users.noreply.github.com>"]
-
-[tool.poetry.dependencies]
-python = ">=3.9,<3.11"
-pandas = "^1.4.2"
-polars = "^0.13.37"
-scikit-learn = "^1.0.2"
-pyarrow = "^8.0.0"
-pathlib = "^1.0.1"
-matplotlib = "^3.5.2"
-
-[tool.poetry.dev-dependencies]
-
-[tool.isort]
-profile = "black"
+readme = "README.md"
+authors = [
+    { name = "idinsmore1", email = "irdinsmore1@geisinger.edu" },
+    { name = "jzlou", email = "jzlou@geisinger.edu" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "joblib>=1.5.3",
+    "pandas>=3.0.0",
+    "polars>=1.37.1",
+    "pyarrow>=23.0.0",
+    "scikit-learn>=1.8.0",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.9.27,<0.10.0"]
+build-backend = "uv_build"
