@@ -25,3 +25,20 @@ dev = [
     "mypy>=1.19.1",
     "ruff>=0.14.14",
 ]
+
+[tool.ruff]
+line-length = 88
+exclude=[
+    ".eggs",
+    ".git",
+    ".vscode",
+    "__pycache__",
+    "build",
+    "dist"
+]
+
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.mypy]
+ignore_missing_imports = true
