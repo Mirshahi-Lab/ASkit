@@ -15,6 +15,7 @@ name = "askit"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "firthmodels" },
     { name = "joblib" },
     { name = "pandas" },
     { name = "polars" },
@@ -30,6 +31,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "firthmodels", specifier = ">=0.7.1" },
     { name = "joblib", specifier = ">=1.5.3" },
     { name = "pandas", specifier = ">=3.0.0" },
     { name = "polars", specifier = ">=1.37.1" },
@@ -41,6 +43,20 @@ requires-dist = [
 dev = [
     { name = "mypy", specifier = ">=1.19.1" },
     { name = "ruff", specifier = ">=0.14.14" },
+]
+
+[[package]]
+name = "firthmodels"
+version = "0.7.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/db/e8/21bc1a9b9c4205a13c13ca4eb0c09b5f68f7959783a8d1f3034c2448cbe2/firthmodels-0.7.1.tar.gz", hash = "sha256:8ad16591452668f9bed1aa2407a9edd4e7418687055dc55f527d72c0dc65a529", size = 624564, upload-time = "2026-01-29T05:00:23.119Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/82/47/74c59d7aedd358d51cb39cf6cbd2ce3f3251ddd06792bd3ea9fe697f2477/firthmodels-0.7.1-py3-none-any.whl", hash = "sha256:5ebcf04e4b4534bd55bb2270b32b0ce430233d6ce38d5661f3ea6e45cb9fa356", size = 59765, upload-time = "2026-01-29T05:00:21.85Z" },
 ]
 
 [[package]]
