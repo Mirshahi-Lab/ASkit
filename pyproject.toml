@@ -11,6 +11,7 @@ requires-python = ">=3.11"
 dependencies = [
     "firthmodels>=0.7.1",
     "joblib>=1.5.3",
+    "loguru>=0.7.3",
     "pandas>=3.0.0",
     "polars>=1.37.1",
     "pyarrow>=23.0.0",
