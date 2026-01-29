@@ -1,6 +1,6 @@
 askit mas \
--i /home/irdinsmore1/projects/ASkit/tests/mas/data/phewas_example_5000_samples_5_covariates.csv \
--o /home/irdinsmore1/projects/ASkit/tests/mas/results/phewas_example_5000_samples_5_covariates_mas.parquet \
+-i tests/mas/data/phewas_example_5000_samples_5_covariates.csv \
+-o tests/mas/results/phewas_example_5000_samples_5_covariates_mas.parquet \
 -p rsEXAMPLE \
 -d i:7- \
 -c age,sex,race_1,bmi,smoking_status \

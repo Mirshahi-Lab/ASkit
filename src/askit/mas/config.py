@@ -3,8 +3,7 @@ from argparse import Namespace
 from dataclasses import dataclass, field
 from functools import partial
 from pathlib import Path
-from types import FunctionType
-from typing import Literal
+from typing import Callable, Literal
 
 import polars as pl
 from loguru import logger
@@ -77,9 +76,7 @@ class MASConfig:
     quiet: bool
 
     # Derived attributes post-init
-    reader: FunctionType | partial[pl.LazyFrame] | None = field(
-        default=None, init=False
-    )
+    reader: Callable[[Path], pl.LazyFrame] | None = field(default=None, init=False)
     column_names: list[str] = field(default_factory=list, init=False)
     total_column_count: int = field(default_factory=int, init=False)
     included_column_count: int = field(default_factory=int, init=False)
@@ -181,7 +178,7 @@ class MASConfig:
         null_values = None if self.null_values is None else self.null_values.split(",")
         if self.input_file.suffix == ".parquet":
             self.reader = pl.scan_parquet
-        if self.input_file.suffix == ".ipc":
+        elif self.input_file.suffix == ".ipc":
             self.reader = pl.scan_ipc
         elif self.input_file.suffix == ".csv":
             self.reader = partial(pl.scan_csv, null_values=null_values)
@@ -234,7 +231,10 @@ class MASConfig:
             return [self.column_names[index]]
         # Multiple column indices passed
         elif "-" in indicies:
-            start, end = indicies.split("-")
+            parts = indicies.split("-")
+            if len(parts) != 2:
+                raise ValueError("Invalid index range format. Too many '-' characters.")
+            start, end = parts
             if start.isnumeric():
                 start_idx = int(start)
             else:
@@ -274,7 +274,7 @@ class MASConfig:
             raise ValueError("Dependent and covariate columns must be unique")
         if not cat_covariate_set:
             pass
-        elif not cat_covariate_set & covariate_set:
+        elif not cat_covariate_set.issubset(covariate_set):
             raise ValueError(
                 "Categorical covariate columns must be a subset of covariate columns"
             )
