@@ -38,7 +38,7 @@ exclude=[
 ]
 
 [tool.ruff.lint]
-select = ["I"]
+select = ["I", "F", "E", "W"]
 
 [tool.mypy]
 ignore_missing_imports = true
