@@ -6,8 +6,12 @@ from joblib import Parallel, delayed
 from loguru import logger
 from threadpoolctl import threadpool_limits
 
-from .config import StudyConfig
-from .models import firth_regression, linear_regression, logistic_regression
+from askit.run_study.config import StudyConfig
+from askit.run_study.models import (
+    firth_regression,
+    linear_regression,
+    logistic_regression,
+)
 
 
 def run_all_regressions(config: StudyConfig) -> pl.DataFrame:
@@ -118,13 +122,13 @@ def _run_single_regression(
     y = df.get_column(dep_col).to_numpy()
     # Get the appropriate model
     match config.model:
-        case "firth":
+        case "logistic-firth":
             model_func = firth_regression
         case "logistic":
             model_func = logistic_regression
         case "linear":
             model_func = linear_regression
-        case "firth-hybrid":
+        case "logistic-hybrid":
             model_func = logistic_regression
             output_schema["model"] = "logistic"
 
@@ -132,13 +136,13 @@ def _run_single_regression(
         with threadpool_limits(limits=config.threads_per_worker):
             regression_result = model_func(X, y, config)
             if (
-                config.model == "firth-hybrid"
+                config.model == "logistic-hybrid"
                 and regression_result["pval"] < config.alpha
             ):
                 logger.debug(
                     f"Switching to Firth regression for {dependent} ~ {predictor}"
                 )
-                output_schema["model"] = "firth"
+                output_schema["model"] = "logistic-firth"
                 regression_result = firth_regression(X, y, config)
         output_schema.update(regression_result)
     except Exception as e:
@@ -198,7 +202,7 @@ def _validate_regression_input(
         )
         return output_schema
     # for the logistic regressions, need to check for minimum number of cases/controls
-    if config.model in ["logistic", "firth", "firth-hybrid"]:
+    if config.model in ["logistic", "logistic-firth", "logistic-hybrid"]:
         passed, reason, n_cases, n_controls, total_n = _check_case_counts(
             df, dependent, config.min_case_count
         )

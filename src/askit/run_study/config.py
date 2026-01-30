@@ -50,7 +50,7 @@ class StudyConfig:
     threads_per_worker: int
 
     # Model Options
-    model: Literal["firth", "firth-hybrid", "logistic", "linear"]
+    model: Literal["logistic", "logistic-firth", "logistic-hybrid", "linear"]
     max_iter: int
     max_step: float
     max_halfstep: int
@@ -241,11 +241,11 @@ class StudyConfig:
         return column_list
 
     def _extract_indexed_columns(self, index_str: str) -> list[str]:
-        "Extract the column indicies from an index column string"
-        indicies = index_str.split(":")[-1]
+        "Extract the column indices from an index column string"
+        indices = index_str.split(":")[-1]
         # Only one column index passed
-        if indicies.isnumeric():
-            index = int(indicies)
+        if indices.isnumeric():
+            index = int(indices)
             if index >= self.total_column_count:
                 raise ValueError(
                     f"Index {index} is out of range for \n"
@@ -253,8 +253,8 @@ class StudyConfig:
                 )
             return [self.column_names[index]]
         # Multiple column indices passed
-        elif "-" in indicies:
-            parts = indicies.split("-")
+        elif "-" in indices:
+            parts = indices.split("-")
             if len(parts) != 2:
                 raise ValueError("Invalid index range format. Too many '-' characters.")
             start, end = parts

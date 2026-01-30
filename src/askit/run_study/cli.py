@@ -109,8 +109,8 @@ def add_run_study_command(subparsers: _SubParsersAction) -> None:
         "--model",
         "-m",
         type=str,
-        choices=["firth", "firth-hybrid", "logistic", "linear"],
-        help="Model to use for the study. Firth-hybrid runs Firth's logistic regression"
+        choices=["logistic", "logistic-firth", "logistic-hybrid", "linear"],
+        help="Model to use for the study. logistic-hybrid runs Firth's regression"
         " if logistic regression p-value is below alpha threshold.",
         required=True,
     )
