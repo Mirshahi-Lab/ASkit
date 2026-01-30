@@ -1,0 +1,9 @@
+askit run_study \
+-i tests/run_study/data/phewas_example_5000_samples_5_covariates.csv \
+-o tests/run_study/results/phewas_example_5000_samples_5_covariates_study.csv \
+-p rsEXAMPLE \
+-d i:7- \
+-c age,sex,race_1,bmi,smoking_status \
+-m firth-hybrid \
+-n 16 \
+-t 1 --phewas

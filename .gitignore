@@ -207,3 +207,7 @@ marimo/_lsp/
 __marimo__/
 
 .DS_Store
+
+# MAS test data files
+tests/run_study/data
+tests/run_study/results
