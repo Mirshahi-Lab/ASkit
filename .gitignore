@@ -209,5 +209,5 @@ __marimo__/
 .DS_Store
 
 # MAS test data files
-tests/mas/data
-tests/mas/results
+tests/run_study/data
+tests/run_study/results

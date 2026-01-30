@@ -29,7 +29,7 @@ def _log_format(record):
 
 
 @dataclass
-class MASConfig:
+class StudyConfig:
     """
     Config class to hold parameters for a Multiple Association Study (MAS)
     """
@@ -100,7 +100,7 @@ class MASConfig:
         self._assert_unique_column_sets()
 
     @classmethod
-    def from_args(cls, args: Namespace) -> "MASConfig":
+    def from_args(cls, args: Namespace) -> "StudyConfig":
         "Create a MASConfig from CLI arguments"
         return cls(
             dry_run=args.dry_run,

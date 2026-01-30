@@ -6,11 +6,11 @@ from joblib import Parallel, delayed
 from loguru import logger
 from threadpoolctl import threadpool_limits
 
-from .config import MASConfig
+from .config import StudyConfig
 from .models import firth_regression, linear_regression, logistic_regression
 
 
-def run_all_regressions(config: MASConfig) -> pl.DataFrame:
+def run_all_regressions(config: StudyConfig) -> pl.DataFrame:
     """
     Run all regressions between predictors x dependents
      using the provided configuration.
@@ -60,7 +60,7 @@ def run_all_regressions(config: MASConfig) -> pl.DataFrame:
 
 
 def _run_single_regression(
-    predictor: str, dependent: str, config: MASConfig, task_num: int, total_tasks: int
+    predictor: str, dependent: str, config: StudyConfig, task_num: int, total_tasks: int
 ) -> pl.DataFrame:
     """
     Run a single regression between a predictor and a dependent variable.
@@ -159,7 +159,7 @@ def _validate_regression_input(
     df: pl.DataFrame,
     predictor: str,
     dependent: str,
-    config: MASConfig,
+    config: StudyConfig,
     output_schema: dict,
 ) -> dict[str, Any]:
     """
@@ -273,7 +273,7 @@ def _check_case_counts(
 
 
 def _drop_constant_covariates_for_regression(
-    df: pl.DataFrame, config: MASConfig
+    df: pl.DataFrame, config: StudyConfig
 ) -> pl.DataFrame:
     """
     Drop covariate columns that are constant (no variance).

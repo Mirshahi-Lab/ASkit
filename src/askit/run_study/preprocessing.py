@@ -5,10 +5,10 @@ import tempfile
 import polars as pl
 from loguru import logger
 
-from askit.mas.config import MASConfig
+from askit.run_study.config import StudyConfig
 
 
-def preprocess_input(config: MASConfig) -> pl.LazyFrame:
+def preprocess_input(config: StudyConfig) -> pl.LazyFrame:
     """Preprocess the input data according to the MAS configuration.
 
     Args:
@@ -29,7 +29,7 @@ def preprocess_input(config: MASConfig) -> pl.LazyFrame:
     return data
 
 
-def _limit_to_sex_specific(data: pl.LazyFrame, config: MASConfig) -> pl.LazyFrame:
+def _limit_to_sex_specific(data: pl.LazyFrame, config: StudyConfig) -> pl.LazyFrame:
     """
     Limit the data to sex-specific rows if specified in the configuration.
 
@@ -74,7 +74,7 @@ def _limit_to_sex_specific(data: pl.LazyFrame, config: MASConfig) -> pl.LazyFram
     return sex_specific
 
 
-def _handle_missing_covariates(data: pl.LazyFrame, config: MASConfig) -> pl.LazyFrame:
+def _handle_missing_covariates(data: pl.LazyFrame, config: StudyConfig) -> pl.LazyFrame:
     """
     Handle missing values in covariate columns by dropping rows with missing values.
 
@@ -145,7 +145,7 @@ def _count_missing_values(lf: pl.LazyFrame, columns: list[str]) -> dict[str, int
     return missing_counts
 
 
-def _drop_constant_covariates(data: pl.LazyFrame, config: MASConfig) -> pl.LazyFrame:
+def _drop_constant_covariates(data: pl.LazyFrame, config: StudyConfig) -> pl.LazyFrame:
     """
     Drop covariate columns that are constant (i.e., have the same value for all rows).
 
@@ -180,7 +180,7 @@ def _drop_constant_covariates(data: pl.LazyFrame, config: MASConfig) -> pl.LazyF
         return data
 
 
-def _create_dummy_covariates(data: pl.LazyFrame, config: MASConfig) -> pl.LazyFrame:
+def _create_dummy_covariates(data: pl.LazyFrame, config: StudyConfig) -> pl.LazyFrame:
     """
     Create dummy variables for categorical covariate columns.
 
@@ -237,7 +237,7 @@ def _create_dummy_covariates(data: pl.LazyFrame, config: MASConfig) -> pl.LazyFr
     return data
 
 
-def _write_temp_ipc_file(data: pl.LazyFrame, config: MASConfig) -> None:
+def _write_temp_ipc_file(data: pl.LazyFrame, config: StudyConfig) -> None:
     """
     Write the preprocessed data to a temporary IPC file.
 

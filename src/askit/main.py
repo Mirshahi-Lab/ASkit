@@ -1,6 +1,6 @@
 import argparse
 
-from askit.mas.cli import add_mas_command
+from askit.run_study.cli import add_run_study_command
 
 
 def main() -> None:
@@ -9,6 +9,6 @@ def main() -> None:
     subparsers = parser.add_subparsers(
         title="subcommands", description="Available subcommands", required=True
     )
-    add_mas_command(subparsers)
+    add_run_study_command(subparsers)
     args = parser.parse_args()
     args.func(args)

@@ -6,10 +6,10 @@ import statsmodels.api as sm
 from firthmodels import FirthLogisticRegression
 from sklearn.exceptions import ConvergenceWarning
 
-from askit.mas.config import MASConfig
+from askit.run_study.config import StudyConfig
 
 
-def firth_regression(X: pl.DataFrame, y: np.ndarray, config: MASConfig) -> dict:
+def firth_regression(X: pl.DataFrame, y: np.ndarray, config: StudyConfig) -> dict:
     """Run Firth regression on the given data.
 
     Uses the same default settings as the R logistf package:
@@ -56,7 +56,7 @@ def firth_regression(X: pl.DataFrame, y: np.ndarray, config: MASConfig) -> dict:
         }
 
 
-def logistic_regression(X: pl.DataFrame, y: np.ndarray, config: MASConfig) -> dict:
+def logistic_regression(X: pl.DataFrame, y: np.ndarray, config: StudyConfig) -> dict:
     """Run standard logistic regression on the given data using statsmodels"""
     with warnings.catch_warnings(record=True) as w:
         converged = True
@@ -84,7 +84,7 @@ def logistic_regression(X: pl.DataFrame, y: np.ndarray, config: MASConfig) -> di
 
 
 # TODO - switch this to polars-ols?
-def linear_regression(X: pl.DataFrame, y: np.ndarray, config: MASConfig) -> dict:
+def linear_regression(X: pl.DataFrame, y: np.ndarray, config: StudyConfig) -> dict:
     X_sm = sm.add_constant(X.to_numpy(), prepend=False)
     model = sm.OLS(y, X_sm)
     result = model.fit()

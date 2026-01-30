@@ -1,18 +1,18 @@
 from argparse import _SubParsersAction
 from pathlib import Path
 
-from askit.mas.pipeline import run_mas
+from askit.run_study.pipeline import run_study
 
 
-def add_mas_command(subparsers: _SubParsersAction) -> None:
-    """Add the 'mas' subcommand to the ASkit CLI."""
+def add_run_study_command(subparsers: _SubParsersAction) -> None:
+    """Add the 'run_study' subcommand to the ASkit CLI."""
     subparser = subparsers.add_parser(
-        "mas",
-        help="Multiple Association Study (MAS)",
-        description="Run a Multiple Association Study (MAS)",
+        "run_study",
+        help="Run an Association Study (e.g. PheWAS)",
+        description="Run an Association Study (e.g. PheWAS)",
     )
-    # Set the default function to run when the 'mas' subcommand is invoked
-    subparser.set_defaults(func=run_mas)
+    # Set the default function to run when the 'run_study' subcommand is invoked
+    subparser.set_defaults(func=run_study)
     subparser.add_argument(
         "--dry-run",
         action="store_true",

@@ -3,11 +3,11 @@ from pathlib import Path
 import polars as pl
 from loguru import logger
 
-from .config import MASConfig
+from .config import StudyConfig
 from .constants import phecode_defs
 
 
-def postprocess_results(results: pl.DataFrame, config: MASConfig) -> pl.DataFrame:
+def postprocess_results(results: pl.DataFrame, config: StudyConfig) -> pl.DataFrame:
     """
     Postprocess the regression study results according to the configuration.
 
@@ -30,7 +30,7 @@ def postprocess_results(results: pl.DataFrame, config: MASConfig) -> pl.DataFram
     return df
 
 
-def _calculate_corrected_pvalues(df: pl.DataFrame, config: MASConfig) -> pl.DataFrame:
+def _calculate_corrected_pvalues(df: pl.DataFrame, config: StudyConfig) -> pl.DataFrame:
     """
     Apply multiple testing correction to p-values in the results DataFrame.
 
@@ -58,7 +58,7 @@ def _calculate_corrected_pvalues(df: pl.DataFrame, config: MASConfig) -> pl.Data
         return df  # No correction applied
 
 
-def _add_phecode_definitions(df: pl.DataFrame, config: MASConfig) -> pl.DataFrame:
+def _add_phecode_definitions(df: pl.DataFrame, config: StudyConfig) -> pl.DataFrame:
     """
     Add PheCode definitions to the results DataFrame.
 
@@ -90,7 +90,7 @@ def _add_phecode_definitions(df: pl.DataFrame, config: MASConfig) -> pl.DataFram
         )
 
 
-def _write_to_output(df: pl.DataFrame, config: MASConfig) -> None:
+def _write_to_output(df: pl.DataFrame, config: StudyConfig) -> None:
     """
     Write the results DataFrame to the specified output path in CSV format.
 
