@@ -27,6 +27,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "jupyterlab>=4.5.3",
     "mypy>=1.19.1",
     "ruff>=0.14.14",
 ]

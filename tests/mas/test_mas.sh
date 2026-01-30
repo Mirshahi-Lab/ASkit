@@ -6,5 +6,4 @@ askit mas \
 -c age,sex,race_1,bmi,smoking_status \
 -m firth \
 -n 16 \
--t 1 \
---dry-run
+-t 1

@@ -81,6 +81,7 @@ class MASConfig:
     total_column_count: int = field(default_factory=int, init=False)
     included_column_count: int = field(default_factory=int, init=False)
     included_row_count: int = field(default_factory=int, init=False)
+    # Temporary file path for preprocessed data
     ipc_file: str | None = field(default=None, init=False)
     # Column lists
     predictor_columns: list[str] = field(default_factory=list, init=False)
@@ -130,13 +131,29 @@ class MASConfig:
             quiet=args.quiet,
         )
 
+    def read_data(self) -> pl.LazyFrame:
+        if self.reader is None:
+            raise RuntimeError("Data reader is not initialized.")
+        lf = self.reader(self.input_file).select(self.included_columns)
+        self.update_row_and_column_counts(lf)
+        logger.info(
+            f"Successfully read {self.input_file.name} and selected "
+            f"{self.included_row_count} rows and {self.included_column_count} columns"
+        )
+        return lf
+
+    def update_row_and_column_counts(self, lf: pl.LazyFrame) -> None:
+        """Update the included row and column counts based on a LazyFrame"""
+        self.included_column_count = lf.collect_schema().len()
+        self.included_row_count = lf.select(pl.len()).collect().item()
+
     def setup_logger(self):
         logger.remove()
         if self.quiet:
             logger.add(
                 sys.stdout,
                 level="SUCCESS",
-                format=self._log_format,
+                format=_log_format,
                 filter=lambda record: record["level"].no <= 25,
                 enqueue=True,
             )
@@ -145,7 +162,7 @@ class MASConfig:
             logger.add(
                 sys.stdout,
                 level="DEBUG",
-                format=self._log_format,
+                format=_log_format,
                 filter=lambda record: record["level"].no <= 25,
                 enqueue=True,
             )
