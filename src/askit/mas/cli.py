@@ -165,6 +165,14 @@ def add_mas_command(subparsers: _SubParsersAction) -> None:
         default=0.05,
         help="Default is 0.05. Significance level for the MAS analysis.",
     )
+    model_group.add_argument(
+        "--correction",
+        type=str,
+        choices=["bonferroni", "none"],
+        default="bonferroni",
+        help="Default is 'bonferroni'. Multiple testing correction method "
+        "to apply to p-values.",
+    )
 
     # Preprocessing options
     preprocessing_group = subparser.add_argument_group(
@@ -207,6 +215,13 @@ def add_mas_command(subparsers: _SubParsersAction) -> None:
         "--flipwas",
         action="store_true",
         help="This is a PheWAS analysis where PheCodes are the predictor variables.",
+    )
+    phecode_group.add_argument(
+        "--phecode-def",
+        type=str,
+        choices=["1.2", "X"],
+        default="1.2",
+        help="Default is '1.2'. PheCode definition version to use.",
     )
     phecode_group.add_argument(
         "--sex-col",

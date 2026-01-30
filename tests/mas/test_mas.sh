@@ -4,6 +4,6 @@ askit mas \
 -p rsEXAMPLE \
 -d i:7- \
 -c age,sex,race_1,bmi,smoking_status \
--m firth \
+-m firth-hybrid \
 -n 16 \
--t 1
+-t 1 --phewas

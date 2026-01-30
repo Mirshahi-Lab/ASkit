@@ -126,6 +126,7 @@ def _run_single_regression(
             model_func = linear_regression
         case "firth-hybrid":
             model_func = logistic_regression
+            output_schema["model"] = "logistic"
 
     try:
         with threadpool_limits(limits=config.threads_per_worker):
@@ -137,6 +138,7 @@ def _run_single_regression(
                 logger.debug(
                     f"Switching to Firth regression for {dependent} ~ {predictor}"
                 )
+                output_schema["model"] = "firth"
                 regression_result = firth_regression(X, y, config)
         output_schema.update(regression_result)
     except Exception as e:
@@ -184,10 +186,7 @@ def _validate_regression_input(
     """
     # this handles both linear and logistic regression size checks
     output_schema.update(
-        {
-            "predictor": predictor,
-            "dependent": dependent,
-        }
+        {"predictor": predictor, "dependent": dependent, "model": config.model}
     )
     if df.height < config.min_case_count:
         output_schema.update(
@@ -330,6 +329,7 @@ def _get_output_schema(model_type: str) -> dict:
         "se": float("nan"),
         "beta_ci_low": float("nan"),
         "beta_ci_high": float("nan"),
+        "model": "nan",
         "failed_reason": "nan",
         "equation": "nan",
     }

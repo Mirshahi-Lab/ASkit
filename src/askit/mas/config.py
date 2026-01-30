@@ -59,6 +59,7 @@ class MASConfig:
     fit_intercept: bool
     penalty_weight: float
     alpha: float
+    correction: Literal["none", "bonferroni", "fdr_bh"]
 
     # Preprocessing Options
     min_case_count: int
@@ -67,6 +68,7 @@ class MASConfig:
     # PheCode Options
     is_phewas: bool
     is_flipwas: bool
+    phecode_def: Literal["1.2", "X"]
     sex_col: str
     female_code: str
     male_only: bool
@@ -121,10 +123,12 @@ class MASConfig:
             fit_intercept=not args.no_intercept,
             penalty_weight=args.penalty_weight,
             alpha=args.alpha,
+            correction=args.correction,
             min_case_count=args.min_case_count,
             missing_covariates_operation=args.missing_covariates_operation,
             is_phewas=args.phewas,
             is_flipwas=args.flipwas,
+            phecode_def=args.phecode_def,
             sex_col=args.sex_col,
             female_code=args.female_code,
             male_only=args.male_only,
