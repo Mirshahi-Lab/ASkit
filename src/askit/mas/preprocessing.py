@@ -24,7 +24,8 @@ def preprocess_input(config: MASConfig) -> pl.LazyFrame:
     data = _handle_missing_covariates(data, config)
     data = _drop_constant_covariates(data, config)
     data = _create_dummy_covariates(data, config)
-    print(data.head().collect())
+    _write_temp_ipc_file(data, config)
+    logger.success("Preprocessing complete.")
     return data
 
 
@@ -256,10 +257,10 @@ def _write_temp_ipc_file(data: pl.LazyFrame, config: MASConfig) -> None:
         config.ipc_file = temp_ipc_name
         data.sink_ipc(temp_ipc_name)
     logger.info(f"Preprocessed data written to temporary IPC file: {temp_ipc_name}")
-    atexit.register(_cleanup_ipc, temp_ipc_name)
+    atexit.register(cleanup_ipc, temp_ipc_name)
 
 
-def _cleanup_ipc(temp_ipc_file: str) -> None:
+def cleanup_ipc(temp_ipc_file: str) -> None:
     """Remove the temporary IPC file if it exists."""
     if os.path.exists(temp_ipc_file):
         try:

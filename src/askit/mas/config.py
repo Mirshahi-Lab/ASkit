@@ -58,6 +58,7 @@ class MASConfig:
     xtol: float
     fit_intercept: bool
     penalty_weight: float
+    alpha: float
 
     # Preprocessing Options
     min_case_count: int
@@ -82,7 +83,7 @@ class MASConfig:
     included_column_count: int = field(default_factory=int, init=False)
     included_row_count: int = field(default_factory=int, init=False)
     # Temporary file path for preprocessed data
-    ipc_file: str | None = field(default=None, init=False)
+    ipc_file: str = field(default="", init=False)
     # Column lists
     predictor_columns: list[str] = field(default_factory=list, init=False)
     dependent_columns: list[str] = field(default_factory=list, init=False)
@@ -119,6 +120,7 @@ class MASConfig:
             xtol=args.xtol,
             fit_intercept=not args.no_intercept,
             penalty_weight=args.penalty_weight,
+            alpha=args.alpha,
             min_case_count=args.min_case_count,
             missing_covariates_operation=args.missing_covariates_operation,
             is_phewas=args.phewas,
