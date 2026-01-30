@@ -10,11 +10,13 @@ from askit.run_study.config import StudyConfig
 
 def preprocess_input(config: StudyConfig) -> pl.LazyFrame:
     """Preprocess the input data according to the MAS configuration.
+    Parameters
+    ----------
+    config : StudyConfig
+        The Study configuration object.
 
-    Args:
-        config (MASConfig): The MAS configuration object.
-
-    Returns:
+    Returns
+    -------
         pl.LazyFrame: The preprocessed data as a Polars LazyFrame.
     """
     # Load the data
@@ -37,8 +39,8 @@ def _limit_to_sex_specific(data: pl.LazyFrame, config: StudyConfig) -> pl.LazyFr
     ----------
     data : pl.LazyFrame
         The input data as a Polars LazyFrame.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -82,8 +84,8 @@ def _handle_missing_covariates(data: pl.LazyFrame, config: StudyConfig) -> pl.La
     ----------
     data : pl.LazyFrame
         The input data as a Polars LazyFrame.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -153,8 +155,8 @@ def _drop_constant_covariates(data: pl.LazyFrame, config: StudyConfig) -> pl.Laz
     ----------
     data : pl.LazyFrame
         The input data as a Polars LazyFrame.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -188,8 +190,8 @@ def _create_dummy_covariates(data: pl.LazyFrame, config: StudyConfig) -> pl.Lazy
     ----------
     data : pl.LazyFrame
         The input data as a Polars LazyFrame.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -245,8 +247,8 @@ def _write_temp_ipc_file(data: pl.LazyFrame, config: StudyConfig) -> None:
     ----------
     data : pl.LazyFrame
         The preprocessed data as a Polars LazyFrame.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------

@@ -17,8 +17,8 @@ def run_all_regressions(config: StudyConfig) -> pl.DataFrame:
 
     Parameters
     ----------
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -71,8 +71,8 @@ def _run_single_regression(
         The predictor column name.
     dependent : str
         The dependent column name.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
     task_num : int
         The current task number (for logging).
     total_tasks : int
@@ -173,8 +173,8 @@ def _validate_regression_input(
         The predictor column name.
     dependent : str
         The dependent column name.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
     output_schema : dict
         The output schema for the results DataFrame.
 
@@ -278,7 +278,7 @@ def _drop_constant_covariates_for_regression(
     """
     Drop covariate columns that are constant (no variance).
     This function is needed in addition to
-    `askit.mas.preprocessing._drop_constant_covariates`
+    `askit.run_study.preprocessing._drop_constant_covariates`
     because we do not want to modify the config's covariate_columns list here,
     and the input is a DataFrame, not a LazyFrame.
 
@@ -286,8 +286,8 @@ def _drop_constant_covariates_for_regression(
     ----------
     df : pl.DataFrame
         The input DataFrame.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------

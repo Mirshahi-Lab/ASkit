@@ -31,7 +31,7 @@ def _log_format(record):
 @dataclass
 class StudyConfig:
     """
-    Config class to hold parameters for a Multiple Association Study (MAS)
+    Config class to hold parameters for an Association Study (e.g., PheWAS).
     """
 
     dry_run: bool
@@ -101,7 +101,7 @@ class StudyConfig:
 
     @classmethod
     def from_args(cls, args: Namespace) -> "StudyConfig":
-        "Create a MASConfig from CLI arguments"
+        "Create a StudyConfig from CLI arguments"
         return cls(
             dry_run=args.dry_run,
             input_file=args.input_file,

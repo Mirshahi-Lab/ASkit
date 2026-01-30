@@ -25,6 +25,8 @@ def firth_regression(X: pl.DataFrame, y: np.ndarray, config: StudyConfig) -> dic
         The data to use for the regression.
     y : np.ndarray
         The dependent variable.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------

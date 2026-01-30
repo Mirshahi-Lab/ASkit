@@ -17,10 +17,10 @@ def add_run_study_command(subparsers: _SubParsersAction) -> None:
         "--dry-run",
         action="store_true",
         help="Default is False. "
-        "If set, see the configuration but do not actually run the MAS.",
+        "If set, see the configuration but do not actually run the study.",
     )
     input_group = subparser.add_argument_group(
-        "Input Options", "Options for specifying input data for the MAS."
+        "Input Options", "Options for specifying input data for the study."
     )
     input_group.add_argument(
         "--input-file",
@@ -34,7 +34,7 @@ def add_run_study_command(subparsers: _SubParsersAction) -> None:
         "--output-file",
         "-o",
         type=Path,
-        help="Output file path for the MAS analysis results. Can be a .parquet, "
+        help="Output file path for the study analysis results. Can be a .parquet, "
         ".ipc, .csv, .tsv, or .txt file. File suffix will match the format.",
         required=True,
     )
@@ -84,33 +84,33 @@ def add_run_study_command(subparsers: _SubParsersAction) -> None:
     # Multiprocessing Options
     multiprocessing_group = subparser.add_argument_group(
         "Multiprocessing Options",
-        "Options for specifying multiprocessing parameters for the MAS",
+        "Options for specifying multiprocessing parameters for the study",
     )
     multiprocessing_group.add_argument(
         "--num-workers",
         "-n",
         type=int,
         default=1,
-        help="Default is 1. Number of parallel workers to run for the MAS.",
+        help="Default is 1. Number of parallel workers to run for the study.",
     )
     multiprocessing_group.add_argument(
         "--threads-per-worker",
         "-t",
         type=int,
         default=1,
-        help="Default is 1. Number of threads available to each worker for the MAS.",
+        help="Default is 1. Number of threads available to each worker for the study.",
     )
 
     # Model parameters
     model_group = subparser.add_argument_group(
-        "Model Parameters", "Options for specifying model parameters for the MAS."
+        "Model Parameters", "Options for specifying model parameters for the study."
     )
     model_group.add_argument(
         "--model",
         "-m",
         type=str,
         choices=["firth", "firth-hybrid", "logistic", "linear"],
-        help="Model to use for MAS. Firth-hybrid runs Firth's logistic regression"
+        help="Model to use for the study. Firth-hybrid runs Firth's logistic regression"
         " if logistic regression p-value is below alpha threshold.",
         required=True,
     )
@@ -163,7 +163,7 @@ def add_run_study_command(subparsers: _SubParsersAction) -> None:
         "--alpha",
         type=float,
         default=0.05,
-        help="Default is 0.05. Significance level for the MAS analysis.",
+        help="Default is 0.05. Significance level for the study analysis.",
     )
     model_group.add_argument(
         "--correction",
@@ -177,7 +177,7 @@ def add_run_study_command(subparsers: _SubParsersAction) -> None:
     # Preprocessing options
     preprocessing_group = subparser.add_argument_group(
         "Preprocessing Parameters",
-        "Options for specifying preprocessing parameters for the MAS.",
+        "Options for specifying preprocessing parameters for the study.",
     )
     preprocessing_group.add_argument(
         "--min-case-count",
@@ -203,7 +203,7 @@ def add_run_study_command(subparsers: _SubParsersAction) -> None:
 
     # PheCode Options
     phecode_group = subparser.add_argument_group(
-        "PheCode Options", "PheCode-related options for the MAS."
+        "PheCode Options", "PheCode-related options for the study."
     )
     phewas_group = phecode_group.add_mutually_exclusive_group()
     phewas_group.add_argument(

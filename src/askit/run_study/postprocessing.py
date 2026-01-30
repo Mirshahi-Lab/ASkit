@@ -3,8 +3,8 @@ from pathlib import Path
 import polars as pl
 from loguru import logger
 
-from .config import StudyConfig
-from .constants import phecode_defs
+from askit.run_study.config import StudyConfig
+from askit.run_study.constants import phecode_defs
 
 
 def postprocess_results(results: pl.DataFrame, config: StudyConfig) -> pl.DataFrame:
@@ -15,8 +15,8 @@ def postprocess_results(results: pl.DataFrame, config: StudyConfig) -> pl.DataFr
     ----------
     results : pl.DataFrame
         The raw regression results as a Polars DataFrame.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -38,8 +38,8 @@ def _calculate_corrected_pvalues(df: pl.DataFrame, config: StudyConfig) -> pl.Da
     ----------
     df : pl.DataFrame
         The results DataFrame containing p-values.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -66,8 +66,8 @@ def _add_phecode_definitions(df: pl.DataFrame, config: StudyConfig) -> pl.DataFr
     ----------
     df : pl.DataFrame
         The results DataFrame containing PheCodes.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
@@ -98,8 +98,8 @@ def _write_to_output(df: pl.DataFrame, config: StudyConfig) -> None:
     ----------
     df : pl.DataFrame
         The results DataFrame to write.
-    config : MASConfig
-        The MAS configuration object.
+    config : StudyConfig
+        The Study configuration object.
 
     Returns
     -------
