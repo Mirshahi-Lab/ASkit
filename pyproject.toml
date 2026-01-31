@@ -1,11 +1,11 @@
 [project]
-name = "askit"
+name = "ASkit"
 version = "0.1.0"
 description = ""
 readme = "README.md"
 authors = [
     { name = "idinsmore1", email = "irdinsmore1@geisinger.edu" },
-    { name = "jzlou", email = "jzlou@geisinger.edu" }
+    { name = "jzluo", email = "jzluo1@geisinger.edu" }
 ]
 requires-python = ">=3.11"
 dependencies = [
